@@ -1,37 +1,51 @@
 pipeline {
-agent any
-stages {
-stage('Setup') {
-steps {
-script {
-// Install Node.js
-sh 'curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -'
-sh 'sudo apt-get install -y nodejs'
-
-// Install other necessary dependencies
-sh 'sudo apt-get install -y '
-}
-}
-}
-stage('Build') {
-steps {
-echo 'Building application...'
-sh 'npm install'
-sh 'npm start'
-}
-}
-stage('Test') {
-steps {
-echo 'Running tests...'
-sh 'npm test'
-}
-}
-stage('Deploy') {
-steps {
-echo 'Deploying application...'
-// Add your deployment commands here
-// Example: Deploy to a server using SSH, Docker, or any other method
-}
-}
-}
+    agent any
+    
+    environment {
+        NODEJS_HOME = tool 'NodeJS' // Assuming NodeJS is configured in Jenkins tools
+        PATH = "${env.NODEJS_HOME}/bin:${env.PATH}"
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                // Checkout your repository
+                git 'https://github.com/UmeshGayashan/Bank-Account-Management-System-Backend-MERN/'
+            }
+        }
+        
+        stage('Install Dependencies') {
+            steps {
+                // Install Node.js dependencies
+                sh 'npm install'
+            }
+        }
+        
+        stage('Lint Code') {
+            steps {
+                // No linting script defined in package.json, skipping linting
+            }
+        }
+        
+        stage('Start Application') {
+            steps {
+                // Start the application using nodemon
+                sh 'npm start'
+            }
+        }
+    }
+    
+    post {
+        success {
+            // Add any success post-build actions here
+            // For example, sending notifications
+            echo 'Application started successfully!'
+        }
+        
+        failure {
+            // Add any failure post-build actions here
+            // For example, sending notifications
+            echo 'Failed to start application!'
+        }
+    }
 }
